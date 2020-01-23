@@ -2,6 +2,11 @@ using Strategy;
 
 namespace Strategy
 {
+	errordomain FunctionSyntaxError
+	{
+		ERROR
+	}
+
 	class Function : Object
 	{
 		private string function { get; set construct; }
