@@ -1,1 +1,1 @@
-# strategy_app_data_visualizer
+# Strategy App Data Visualizer
