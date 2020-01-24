@@ -3,15 +3,19 @@ using Gee;
 
 namespace Strategy
 {
-	errordomain FunctionSyntaxError
+	errordomain Function
 	{
-		ERROR
+		SYNTAX_ERROR
 	}
+
+	const uchar PAREN_REF = 0x1f;
+	const uchar PAREN_RET = 0x1e;
+	const uchar VAR_REF = 0x1d;
 
 	class Function : Object
 	{
 		private string function_s { get; set construct; }
-		private ArrayList<StringBuilder> function { get; set; }
+		private ArrayList<string> function { get; set; }
 
 		public Function ()
 		{
@@ -26,21 +30,42 @@ namespace Strategy
 		{
 			if (function != null)
 			{
-				parse_string (function_s);
+				set_function (function_s);
 			}
 		}
 
-		public void parse_string (string in)
+		public void set_function (string in)
 		{
-			function = new ArrayList<StringBuilder> ();
-			function.add (new StringBuilder ());
-			int paren_index = 0;
+			ArrayList<StringBuilder> output = new ArrayList<StringBuilder> ();
+			output.add (new StringBuilder ());
+
+			int index = 0;
+			int index_ret = 0;
 			
 			for (int i = 0; i < in.length; i ++)
 			{
 				switch (in[i])
 				{
+					case '(':
+						output[index].append ("" + PAREN_REF + output.size + index_ret);
+						index_ret = index;
+						index = output.size;
+						output.add (new StringBuilder ());
+						break;
+					case ')':
+						output[index].append ("" + PAREN_RET + index_ret);
+						index = index_ret;
+						ssize_t temp = output[index].len;
+						index_ret = (int) output[index].str[temp - 1];
+						output[index].truncate (1);
+						break;
 				}
+			}
+
+			function = new ArrayList<string> ();
+			for (int i = 0; i < output.size; i ++)
+			{
+				function.add (output[i].str); 
 			}
 		}
 	}
