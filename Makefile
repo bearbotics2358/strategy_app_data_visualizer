@@ -1,4 +1,4 @@
-SOURCEFILES=main.vala strategy_app.vala strategy_window.vala strategy_graph.vala
+SOURCEFILES=main.vala strategy_app.vala strategy_window.vala strategy_graph.vala strategy_function.vala
 RESOURCEDIR=resources/
 RESOURCES=$(RESOURCEDIR).gresource.xml $(RESOURCEDIR)main_window.ui
 

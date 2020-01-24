@@ -3,9 +3,10 @@ using Gee;
 
 namespace Strategy
 {
-	errordomain Function
+	errordomain FuncError
 	{
-		SYNTAX_ERROR
+		SYNTAX_ERROR,
+		UNDEFINED_VAR
 	}
 
 	const uchar PAREN_REF = 0x1f;
@@ -14,8 +15,8 @@ namespace Strategy
 
 	class Function : Object
 	{
-		private string function_s { get; set construct; }
-		private ArrayList<string> function { get; set; }
+		public string function_s {get; set construct; }
+		public ArrayList<string> function { get; set; }
 
 		public Function ()
 		{
@@ -23,7 +24,7 @@ namespace Strategy
 
 		public Function.with_input (string in)
 		{
-			Object (function: in);
+			Object (function_s: in);
 		}
 
 		construct
@@ -47,17 +48,20 @@ namespace Strategy
 				switch (in[i])
 				{
 					case '(':
-						output[index].append ("" + PAREN_REF + output.size + index_ret);
+						output[index].append (PAREN_REF.to_string () + output.size.to_string () + index_ret.to_string ());
 						index_ret = index;
 						index = output.size;
 						output.add (new StringBuilder ());
 						break;
 					case ')':
-						output[index].append ("" + PAREN_RET + index_ret);
+						output[index].append (PAREN_RET.to_string () + index_ret.to_string ());
 						index = index_ret;
 						ssize_t temp = output[index].len;
 						index_ret = (int) output[index].str[temp - 1];
 						output[index].truncate (1);
+						break;
+					default:
+						output[index].append_c (in[i]);
 						break;
 				}
 			}
@@ -67,6 +71,11 @@ namespace Strategy
 			{
 				function.add (output[i].str); 
 			}
+		}
+
+		public int eval (HashMap<char, int> in)
+		{
+			return 0;
 		}
 	}
 }
