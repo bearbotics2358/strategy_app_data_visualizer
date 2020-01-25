@@ -2,7 +2,7 @@ SOURCEFILES=main.vala strategy_app.vala strategy_window.vala strategy_graph.vala
 RESOURCEDIR=resources/
 RESOURCES=$(RESOURCEDIR)strategy.gresource.xml $(RESOURCEDIR)main_window.ui
 
-VALAFLAGS=--pkg gtk+-3.0 --pkg cairo --pkg gee-0.8
+VALAFLAGS=--pkg gtk+-3.0 --pkg cairo --pkg gee-0.8 -X -lm
 
 build : $(SOURCEFILES)
 	valac -o strategy_app $(SOURCEFILES) $(VALAFLAGS)

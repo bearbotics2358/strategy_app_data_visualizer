@@ -20,6 +20,11 @@ namespace Strategy
 	const int EXPONENT = '^';
 	const int LOG = 0x7f;
 
+	float logbasef (float b, float in)
+	{
+		return Math.log10f (in) / Math.log10f (b);
+	}
+
 	class Function : Object
 	{
 		private ArrayList<ArrayList<int>> function { get; set; }
@@ -54,8 +59,8 @@ namespace Strategy
 						output.add (new ArrayList<int> ());
 						break;
 					case ')':
-						output[index].add (PAREN_RET);
-						output[index].add (index_ret);
+						//output[index].add (PAREN_RET);
+						//output[index].add (index_ret);
 						index = index_ret;
 						int temp = output[index].size;
 						if (index != 0)
@@ -96,7 +101,7 @@ namespace Strategy
 			function = output;
 		}
 
-		public int eval (HashMap<char, float?> in)
+		public float eval (HashMap<char, float?> in)
 		{
 			var output = new LinkedList<LinkedList<int>> ();
 			for (int i = 0; i < function.size; i ++)
@@ -105,21 +110,16 @@ namespace Strategy
 				function[i].foreach ((g) => { output[i].add (g); return true; });
 			}
 
-			int index = 0;
-			int i = 0;
-
-			while (function[index][i] != 0)
-			{
-				
-			}
-			return 0;
+			return eval_manage (output, 0, in);
 		}
 
-		private void eval_manage (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars)
+		private float eval_manage (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars)
 		{
 			sub_eval (in, index, vars, @"$(EXPONENT)$(LOG)");
 			sub_eval (in, index, vars, @"$(MULT)$(DIVIDE)");
 			sub_eval (in, index, vars, @"$(ADD)$(SUB)");
+			int temp_i = in->get (index).get (0);
+			return *((float *)(&temp_i));
 		}
 
 		private void sub_eval (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars, string ops) throws FuncError
@@ -143,6 +143,10 @@ namespace Strategy
 						{
 							args[0] = vars[(char) output[i - 1]];
 						}
+						else if (output[i - 2] == PAREN_REF)
+						{
+							args[0] = eval_manage (in, output[i - 1], vars);
+						}
 						else
 						{
 							throw new FuncError.SYNTAX_ERROR ("");
@@ -165,6 +169,10 @@ namespace Strategy
 								{
 									args[1] = vars[(char) output[i + 2]];
 								}
+								else if (output[i + 1] == PAREN_REF)
+								{
+									args[1] = eval_manage (in, output[i + 2], vars);
+								}
 								else
 								{
 									throw new FuncError.SYNTAX_ERROR ("");
@@ -174,14 +182,37 @@ namespace Strategy
 								args[1] = 0;
 								break;
 						}
+						float temp_f = eval_op (ops[j], args);
+						int result = *((int *)(&temp_f));
+						i -= 2;
+						output.remove_at (i);
+						output.remove_at (i);
+						output.remove_at (i);
+						output.remove_at (i);
+						output[i] = result;
 					}
 				}
 			}
 		}
 
-		private float eval_op (char op, int[] args)
+		private float eval_op (char op, float[] args)
 		{
-			return 0.0f;
+			switch ((int) op)
+			{
+				case ADD:
+					return args[0] + args[1];
+				case SUB:
+					return args[0] - args[1];
+				case MULT:
+					return args[0] * args[1];
+				case DIVIDE:
+					return args[0] / args[1];
+				case EXPONENT:
+					return Math.powf (args[0], args[1]);
+				case LOG:
+					return logbasef (args[0], args[1]);
+			}
+			return float.NAN;
 		}
 
 		private char is_digit (char in)
