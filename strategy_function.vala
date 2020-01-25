@@ -16,7 +16,7 @@ namespace Strategy
 
 	class Function : Object
 	{
-		public ArrayList<ArrayList<int>> function { get; set; }
+		private ArrayList<ArrayList<int>> function { get; set; }
 
 		public Function ()
 		{
@@ -59,7 +59,30 @@ namespace Strategy
 						}
 						break;
 					default:
-						output[index].add (in[i]);
+						if (is_digit (in[i]) == 1)
+						{
+							string temp_s = "";
+
+							while (is_digit (in[i]) == 1 || is_digit (in[i]) == 2)
+							{
+								temp_s += in[i].to_string ();
+								i ++;
+							}
+
+							i --;
+							float temp_f = float.parse (temp_s);
+							output[index].add (CONST);
+							output[index].add (*((int *)((void *)(&temp_f))));
+						}
+						else if (in[i].isalpha ())
+						{
+							output[index].add (VAR_REF);
+							output[index].add (in[i]);
+						}
+						else
+						{
+							output[index].add (in[i]);
+						}
 						break;
 				}
 			}
@@ -67,7 +90,7 @@ namespace Strategy
 			function = output;
 		}
 
-		public int eval (HashMap<int, int> in)
+		public int eval (HashMap<char, float?> in)
 		{
 			var output = new LinkedList<LinkedList<int>> ();
 			for (int i = 0; i < function.size; i ++)
@@ -91,23 +114,25 @@ namespace Strategy
 			return "";
 		}
 
-		private bool is_digit (char in)
+		private char is_digit (char in)
 		{
 			switch (in)
 			{
-				case 0:
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-				case 7:
-				case 8:
-				case 9:
-					return true;
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					return 1;
+				case '.':
+					return 2;
 				default:
-					return false;
+					return 0;
 			}
 		}
 	}
