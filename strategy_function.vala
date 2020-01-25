@@ -136,7 +136,8 @@ namespace Strategy
 
 						if (output[i - 2] == CONST)
 						{
-							//args[0] = *((float *)((void *)((int *)(&(output.get (i - 1))))));
+							int temp_i1 = output[i - 1];
+							args[0] = *((float *)(&temp_i1));
 						}
 						else if (output[i - 2] == VAR_REF)
 						{
@@ -147,21 +148,40 @@ namespace Strategy
 							throw new FuncError.SYNTAX_ERROR ("");
 						}
 
-						if (output[i + 1] == CONST)
+						switch ((int) ops[j])
 						{
-							//args[1] = *((float *)((void *)((int *)(&(output.get (i + 2))))));
-						}
-						else if (output[i + 1] == VAR_REF)
-						{
-							args[1] = vars[(char) output[i + 2]];
-						}
-						else
-						{
-							throw new FuncError.SYNTAX_ERROR ("");
+							case ADD:
+							case SUB:
+							case MULT:
+							case DIVIDE:
+							case EXPONENT:
+							case LOG:
+								if (output[i + 1] == CONST)
+								{
+									int temp_i1 = output[i + 2];
+									args[1] = *((float *)(&temp_i1));
+								}
+								else if (output[i + 1] == VAR_REF)
+								{
+									args[1] = vars[(char) output[i + 2]];
+								}
+								else
+								{
+									throw new FuncError.SYNTAX_ERROR ("");
+								}
+								break;
+							default:
+								args[1] = 0;
+								break;
 						}
 					}
 				}
 			}
+		}
+
+		private float eval_op (char op, int[] args)
+		{
+			return 0.0f;
 		}
 
 		private char is_digit (char in)
