@@ -13,6 +13,12 @@ namespace Strategy
 	const int PAREN_RET = 0x1e;
 	const int VAR_REF = 0x1d;
 	const int CONST = 0x1c;
+	const int ADD = '+';
+	const int SUB = '-';
+	const int MULT = '*';
+	const int DIVIDE = '/';
+	const int EXPONENT = '^';
+	const int LOG = 0x7f;
 
 	class Function : Object
 	{
@@ -99,19 +105,63 @@ namespace Strategy
 				function[i].foreach ((g) => { output[i].add (g); return true; });
 			}
 
+			int index = 0;
 			int i = 0;
-			int j = 0;
 
-			while (function[i][j] != 0)
+			while (function[index][i] != 0)
 			{
 				
 			}
 			return 0;
 		}
 
-		public string to_string ()
+		private void eval_manage (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars)
 		{
-			return "";
+			sub_eval (in, index, vars, @"$(EXPONENT)$(LOG)");
+			sub_eval (in, index, vars, @"$(MULT)$(DIVIDE)");
+			sub_eval (in, index, vars, @"$(ADD)$(SUB)");
+		}
+
+		private void sub_eval (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars, string ops) throws FuncError
+		{
+			LinkedList<int> output = in->get (index);
+
+			for (int i = 0; i < output.size; i ++)
+			{
+				for (int j = 0; j < ops.length; j ++)
+				{
+					if (output[i] == ops[j])
+					{
+						float[] args = new float[2];
+
+						if (output[i - 2] == CONST)
+						{
+							//args[0] = *((float *)((void *)((int *)(&(output.get (i - 1))))));
+						}
+						else if (output[i - 2] == VAR_REF)
+						{
+							args[0] = vars[(char) output[i - 1]];
+						}
+						else
+						{
+							throw new FuncError.SYNTAX_ERROR ("");
+						}
+
+						if (output[i + 1] == CONST)
+						{
+							//args[1] = *((float *)((void *)((int *)(&(output.get (i + 2))))));
+						}
+						else if (output[i + 1] == VAR_REF)
+						{
+							args[1] = vars[(char) output[i + 2]];
+						}
+						else
+						{
+							throw new FuncError.SYNTAX_ERROR ("");
+						}
+					}
+				}
+			}
 		}
 
 		private char is_digit (char in)
@@ -134,6 +184,11 @@ namespace Strategy
 				default:
 					return 0;
 			}
+		}
+
+		public string to_string ()
+		{
+			return "";
 		}
 	}
 }
