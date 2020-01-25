@@ -15,8 +15,7 @@ namespace Strategy
 
 	class Function : Object
 	{
-		public string function_s {get; set construct; }
-		public ArrayList<string> function { get; set; }
+		public ArrayList<ArrayList<int>> function { get; set; }
 
 		public Function ()
 		{
@@ -24,21 +23,14 @@ namespace Strategy
 
 		public Function.with_input (string in)
 		{
-			Object (function_s: in);
+			set_func (in);
 		}
 
-		construct
+		public void set_func (string in)
 		{
-			if (function != null)
-			{
-				set_function (function_s);
-			}
-		}
-
-		public void set_function (string in)
-		{
-			ArrayList<StringBuilder> output = new ArrayList<StringBuilder> ();
-			output.add (new StringBuilder ());
+			var output = new ArrayList<ArrayList<int>> ();
+			var temp_s = new ArrayList<int> ();
+			output.add (temp_s);
 
 			int index = 0;
 			int index_ret = 0;
@@ -48,34 +40,41 @@ namespace Strategy
 				switch (in[i])
 				{
 					case '(':
-						output[index].append (PAREN_REF.to_string () + output.size.to_string () + index_ret.to_string ());
+						output[index].add ((int) PAREN_REF);
+						output[index].add (output.size);
+						output[index].add (index_ret);
 						index_ret = index;
 						index = output.size;
-						output.add (new StringBuilder ());
+						temp_s = new ArrayList<int> ();
+						output.add (temp_s);
 						break;
 					case ')':
-						output[index].append (PAREN_RET.to_string () + index_ret.to_string ());
+						output[index].add ((int) PAREN_RET);
+						output[index].add (index_ret);
 						index = index_ret;
-						ssize_t temp = output[index].len;
-						index_ret = (int) output[index].str[temp - 1];
-						output[index].truncate (1);
+						int temp = output[index].size;
+						if (index != 0)
+						{
+							index_ret = output[index][temp - 1];
+							output[index].remove_at (temp - 1);
+						}
 						break;
 					default:
-						output[index].append_c (in[i]);
+						output[index].add (in[i]);
 						break;
 				}
 			}
-
-			function = new ArrayList<string> ();
-			for (int i = 0; i < output.size; i ++)
-			{
-				function.add (output[i].str); 
-			}
+			function = output;
 		}
 
 		public int eval (HashMap<char, int> in)
 		{
 			return 0;
+		}
+
+		public string to_string ()
+		{
+			return "";
 		}
 	}
 }
