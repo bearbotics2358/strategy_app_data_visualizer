@@ -109,20 +109,25 @@ namespace Strategy
 				output.add (new LinkedList<int> ());
 				function[i].foreach ((g) => { output[i].add (g); return true; });
 			}
-
-			return eval_manage (output, 0, in);
+			float out = eval_manage (output, 0, in);
+			//delete output;
+			return out;
 		}
+
 
 		private float eval_manage (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars)
 		{
-			sub_eval (in, index, vars, @"$(EXPONENT)$(LOG)");
-			sub_eval (in, index, vars, @"$(MULT)$(DIVIDE)");
-			sub_eval (in, index, vars, @"$(ADD)$(SUB)");
+			int[] in_1 = {EXPONENT, LOG};
+			sub_eval (in, index, vars, in_1);
+			int[] in_2 = {MULT, DIVIDE};
+			sub_eval (in, index, vars, in_2);
+			int[] in_3 = {ADD, SUB};
+			sub_eval (in, index, vars, in_3);
 			int temp_i = in->get (index).get (0);
 			return *((float *)(&temp_i));
 		}
 
-		private void sub_eval (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars, string ops) throws FuncError
+		private void sub_eval (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars, int[] ops) throws FuncError
 		{
 			LinkedList<int> output = in->get (index);
 
@@ -152,7 +157,7 @@ namespace Strategy
 							throw new FuncError.SYNTAX_ERROR ("");
 						}
 
-						switch ((int) ops[j])
+						switch (ops[j])
 						{
 							case ADD:
 							case SUB:
@@ -195,9 +200,9 @@ namespace Strategy
 			}
 		}
 
-		private float eval_op (char op, float[] args)
+		private float eval_op (int op, float[] args)
 		{
-			switch ((int) op)
+			switch (op)
 			{
 				case ADD:
 					return args[0] + args[1];
