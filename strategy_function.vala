@@ -66,8 +66,8 @@ namespace Strategy
 						if (index != 0)
 						{
 							index_ret = output[index][temp - 1];
-							output[index].remove_at (temp - 1);
 						}
+						output[index].remove_at (temp - 1);
 						break;
 					default:
 						if (is_digit (in[i]) == 1)
@@ -97,7 +97,6 @@ namespace Strategy
 						break;
 				}
 			}
-			output[0].add (0);
 			function = output;
 		}
 
@@ -109,6 +108,7 @@ namespace Strategy
 				output.add (new LinkedList<int> ());
 				function[i].foreach ((g) => { output[i].add (g); return true; });
 			}
+			
 			float out = eval_manage (output, 0, in);
 			//delete output;
 			return out;
@@ -117,13 +117,14 @@ namespace Strategy
 
 		private float eval_manage (LinkedList<LinkedList<int>> *in, int index, HashMap<char, float?> vars)
 		{
+			//in->get (index).foreach ((a) => { print ("Index: %d, Num: %d\n", index, a); return true; });
 			int[] in_1 = {EXPONENT, LOG};
 			sub_eval (in, index, vars, in_1);
 			int[] in_2 = {MULT, DIVIDE};
 			sub_eval (in, index, vars, in_2);
 			int[] in_3 = {ADD, SUB};
 			sub_eval (in, index, vars, in_3);
-			int temp_i = in->get (index).get (0);
+			int temp_i = in->get (index).get (1);
 			return *((float *)(&temp_i));
 		}
 
@@ -154,7 +155,7 @@ namespace Strategy
 						}
 						else
 						{
-							throw new FuncError.SYNTAX_ERROR ("");
+							throw new FuncError.SYNTAX_ERROR (@"Could Not Find First Argument for $(ops[j]) at Block $(index), Index $(i)");
 						}
 
 						switch (ops[j])
@@ -180,7 +181,7 @@ namespace Strategy
 								}
 								else
 								{
-									throw new FuncError.SYNTAX_ERROR ("");
+									throw new FuncError.SYNTAX_ERROR (@"Could Not Find Second Argument for $(ops[j]) at Block $(index), Index $(i)");
 								}
 								break;
 							default:
@@ -195,6 +196,8 @@ namespace Strategy
 						output.remove_at (i);
 						output.remove_at (i);
 						output[i] = result;
+						output.insert (i, CONST);
+						i ++;
 					}
 				}
 			}
@@ -244,7 +247,30 @@ namespace Strategy
 
 		public string to_string ()
 		{
-			return "";
+			string out = "";
+			bool flag = false;
+			for (int i = 0; i < function.size; i ++)
+			{
+				for (int j = 0; j < function[i].size; j ++)
+				{
+					if (flag)
+					{
+						int temp_i = function[i][j];
+						out += (*((float *)(&temp_i))).to_string () + " ";
+						flag = false;
+					}
+					else
+					{
+						out += ((char) function[i][j]).to_string () + " ";
+						if (function[i][j] == CONST)
+						{
+							flag = true;
+						}
+					}
+				}
+				out += "\n";
+			}
+			return out;
 		}
 	}
 }
