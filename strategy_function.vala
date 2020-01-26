@@ -83,7 +83,7 @@ namespace Strategy
 							i --;
 							float temp_f = float.parse (temp_s);
 							output[index].add (CONST);
-							output[index].add (*((int *)((void *)(&temp_f))));
+							output[index].add (*((int *)(&temp_f)));
 						}
 						else if (in[i].isalpha ())
 						{
@@ -147,7 +147,14 @@ namespace Strategy
 						}
 						else if (output[i - 2] == VAR_REF)
 						{
-							args[0] = vars[(char) output[i - 1]];
+							if (vars.has_key ((char) output[i - 1]))
+							{
+								args[0] = vars[(char) output[i - 1]];
+							}
+							else
+							{
+								throw new FuncError.UNDEFINED_VAR (@"Var $(output[i - 1]) is Undefined");
+							}
 						}
 						else if (output[i - 2] == PAREN_REF)
 						{
@@ -173,7 +180,14 @@ namespace Strategy
 								}
 								else if (output[i + 1] == VAR_REF)
 								{
-									args[1] = vars[(char) output[i + 2]];
+									if (vars.has_key ((char) output[i + 2]))
+									{
+										args[1] = vars[(char) output[i + 2]];
+									}
+									else
+									{
+										throw new FuncError.UNDEFINED_VAR (@"Var $(output[i + 2]) is Undefined");
+									}
 								}
 								else if (output[i + 1] == PAREN_REF)
 								{
