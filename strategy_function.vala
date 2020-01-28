@@ -18,7 +18,7 @@ namespace Strategy
 	const int MULT = '*';
 	const int DIVIDE = '/';
 	const int EXPONENT = '^';
-	const int LOG = 0x7f;
+	const int LOG = '\\';
 
 	float logbasef (float b, float in)
 	{

@@ -5,6 +5,7 @@ namespace Strategy
 	class Window : Gtk.ApplicationWindow
 	{
 		public Graph graph_area { get; construct; }
+
 		public Window ()
 		{
 		}
@@ -12,7 +13,9 @@ namespace Strategy
 		construct
 		{
 			init_template ();
-			graph_area = (Graph) get_template_child (typeof (Graph), "graph_box");
+			graph_area = (Strategy.Graph) get_template_child (typeof (Graph), "graph_box");
+			//graph_area.graph ("x^2");
+			//graph_area.queue_draw ();
 			//graph_area.draw.connect (draw_callback);
 		}
 
@@ -20,7 +23,7 @@ namespace Strategy
 		{
 			Bytes temp = resources.lookup_data ("/org/bearbotics/strategy/main_window.ui", ResourceLookupFlags.NONE);
 			set_template (temp);
-			bind_template_child_full ("graph_box", false, 0);
+			bind_template_child_full ("graph_box", true, 0);
 		}
 
 		/*public void graph (string function)
