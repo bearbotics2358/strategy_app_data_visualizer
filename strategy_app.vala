@@ -2,8 +2,6 @@ using Strategy;
 
 namespace Strategy
 {
-	Resource resources;
-
 	class App : Gtk.Application
 	{
 		public App (string application_id)
@@ -19,7 +17,6 @@ namespace Strategy
 
 		void entry (File[]? files = null, string? hint = null)
 		{
-			resources = Resource.load ("strategy_resources");
 			Window window = new Window ();
 			window.set_application (this);
 			window.present ();

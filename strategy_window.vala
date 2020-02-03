@@ -1,29 +1,16 @@
 using Strategy;
+using Gee;
 
 namespace Strategy
 {
 	class Window : Gtk.ApplicationWindow
 	{
-		public Graph graph_area { get; construct; }
+		private Graph graph_area;
 
 		public Window ()
 		{
-		}
-
-		construct
-		{
-			init_template ();
-			graph_area = (Strategy.Graph) get_template_child (typeof (Graph), "graph_box");
-			//graph_area.graph ("x^2");
-			//graph_area.queue_draw ();
-			//graph_area.draw.connect (draw_callback);
-		}
-
-		static construct
-		{
-			Bytes temp = resources.lookup_data ("/org/bearbotics/strategy/main_window.ui", ResourceLookupFlags.NONE);
-			set_template (temp);
-			bind_template_child_full ("graph_box", true, 0);
+			graph_area = new Graph ("5*x^2");
+			this.add (graph_area);
 		}
 
 		/*public void graph (string function)
@@ -33,18 +20,32 @@ namespace Strategy
 
 		/*public bool draw_callback (Cairo.Context cr)
 		{
-			Gdk.RGBA color;
-			Gtk.StyleContext context = get_style_context ();
-			int width = get_allocated_width ();	
-			int height = get_allocated_height ();
-			
+			stdout.printf ("Redrawn\n");
+			Gtk.StyleContext context = graph_area.get_style_context ();
+			HashMap<char, float?> vars = new HashMap<char, float?> ();
+
+			int width = graph_area.get_allocated_width ();	
+			int height = graph_area.get_allocated_height ();
+
+			function = new Function.with_input ("x^2");
+			print (function.to_string ());
+			if (function != null)
+			{
+				for (int x = 0; x < width; x ++)
+				{
+					vars['x'] = ((float) x) / 10;
+					int y = (int) function.eval (vars);
+					cr.rectangle (x, height - y, 1, 1);
+				}
+			}
 			context.render_background (cr, 0, 0, width, height);
-			cr.arc (128, 128, 100, 0, Math.PI);
+			//cr.arc_negative (128, -128, 100, 0, Math.PI);
 			
-			color = context.get_color (context.get_state ());
-			cr.set_source_rgba (100, 100, 100, 0.5);
+			//color = context.get_color (context.get_state ());
+			cr.set_source_rgba (1, 0, 0, 1);
+			//cr.rectangle (0, 0, 300, 300);
 			cr.fill ();
-			return false;
+			return true;
 		}*/
 	}
 }
