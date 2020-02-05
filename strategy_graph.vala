@@ -11,10 +11,12 @@ namespace Strategy
 
 		public float graph_x;
 		public float graph_y;
+		public float graph_sx;
+		public float graph_sy;
 
-		public bool numbers;
 		public bool grid_lines;
 		public int grid_min_spacing;
+		public int num_space;
 
 		public Graph (string? func = null)
 		{
@@ -24,10 +26,12 @@ namespace Strategy
 			this.height_request = 700;
 			this.graph_x = 1.0f;
 			this.graph_y = 1.0f;
+			this.graph_sx = -0.5f;
+			this.graph_sy = -0.2f;
 
-			this.numbers = true;
 			this.grid_lines = true;
 			this.grid_min_spacing = 30;
+			this.num_space = 20;
 
 			if (func != null)
 			{
@@ -50,10 +54,13 @@ namespace Strategy
 
 			if (grid_lines)
 			{
+				cr.set_font_size (12.0f);
 				float grid_incrament_x = get_grid_incrament (graph_x);
 				float grid_incrament_y = get_grid_incrament (graph_y);
 				int xinc = (int) ((width * grid_incrament_x) / graph_x);
 				int yinc = (int) ((height * grid_incrament_y) / graph_y);
+				float fx = graph_sx;
+				float fy = (grid_incrament_y * ((height / yinc) - 1)) + graph_sy;
 
 				print ("fincx: %f fincy: %f", grid_incrament_x, grid_incrament_y);
 				print ("xinc: %d yinc: %d\n", xinc, yinc);
@@ -61,12 +68,18 @@ namespace Strategy
 				{
 					cr.move_to (x, margins);
 					cr.line_to (x, height + margins);
+					cr.move_to (x, height + margins + num_space);
+					cr.show_text (fx.to_string ());
+					fx += grid_incrament_x;
 				}
 
 				for (int y = yinc + margins; y < height + margins; y += yinc)
 				{
 					cr.move_to (margins, y);
 					cr.line_to (width + margins, y);
+					cr.move_to (margins - num_space, y);
+					cr.show_text (fy.to_string ());
+					fy -= grid_incrament_y;
 				}
 			
 				cr.set_source_rgba (0.9, 0.9, 0.9, 1);
@@ -77,19 +90,22 @@ namespace Strategy
 
 			if (function != null)
 			{
+				bool flag = true;
 				for (int x = 0; x < width; x ++)
 				{
-					vars['x'] = ((graph_x * x) / width);
-					int y = (int) (height - ((height * function.eval (vars)) / graph_y));
+					vars['x'] = ((graph_x * x) / width) + graph_sx;
+					int y = (int) (height - (height * (function.eval (vars) - graph_sy) / graph_y));
 
-					if (y < 0)
+					if (y < 0 || y > height)
 					{
+						flag = true;
 						continue;
 					}
 
-					if (x == 0)
+					if (flag)
 					{
 						cr.move_to (x + margins, y + margins);
+						flag = false;
 					}
 					else
 					{
