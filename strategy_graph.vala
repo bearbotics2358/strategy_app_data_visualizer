@@ -35,6 +35,8 @@ namespace Strategy
 			}
 
 			this.visible = true;
+
+			//print ("%f %f", get_grid_incrament (8.3f), get_grid_incrament (250.1f));
 		}
 
 		public override bool draw (Cairo.Context cr)
@@ -48,13 +50,20 @@ namespace Strategy
 
 			if (grid_lines)
 			{
-				for (int x = grid_min_spacing + margins; x < width + margins; x += grid_min_spacing)
+				float grid_incrament_x = get_grid_incrament (graph_x);
+				float grid_incrament_y = get_grid_incrament (graph_y);
+				int xinc = (int) ((width * grid_incrament_x) / graph_x);
+				int yinc = (int) ((height * grid_incrament_y) / graph_y);
+
+				print ("fincx: %f fincy: %f", grid_incrament_x, grid_incrament_y);
+				print ("xinc: %d yinc: %d\n", xinc, yinc);
+				for (int x = xinc + margins; x < width + margins; x += xinc)
 				{
 					cr.move_to (x, margins);
 					cr.line_to (x, height + margins);
 				}
 
-				for (int y = grid_min_spacing + margins; y < height + margins; y += grid_min_spacing)
+				for (int y = yinc + margins; y < height + margins; y += yinc)
 				{
 					cr.move_to (margins, y);
 					cr.line_to (width + margins, y);
@@ -71,7 +80,7 @@ namespace Strategy
 				for (int x = 0; x < width; x ++)
 				{
 					vars['x'] = ((graph_x * x) / width);
-					int y = (int) (height - ((height *function.eval (vars)) / graph_y));
+					int y = (int) (height - ((height * function.eval (vars)) / graph_y));
 
 					if (y < 0)
 					{
@@ -100,6 +109,19 @@ namespace Strategy
 		{
 			function = new Function.with_input (func);
 			queue_draw ();
+		}
+
+		private float get_grid_incrament (float in)
+		{
+			in *= 100;
+			for (int i = 100000; i > 0; i /= 10)
+			{
+				if (in >= i)
+				{
+					return i / 1000.0f;
+				}
+			}
+			return 0.0001f;
 		}
 	}
 }
