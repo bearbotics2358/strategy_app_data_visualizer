@@ -3,7 +3,15 @@ using Gee;
 
 namespace Strategy
 {
-	class Graph : Gtk.DrawingArea, Gtk.Buildable
+	enum GraphScaleMode
+	{
+		NO_SCALE,
+		FIXED_LEFT,
+		FIXED_MIDDLE,
+		FIXED_RIGHT
+	}
+		
+	class Graph : Gtk.DrawingArea
 	{
 		public Function function;
 
@@ -14,6 +22,9 @@ namespace Strategy
 		public float graph_sx;
 		public float graph_sy;
 
+		public GraphScaleMode scale_mode;
+		public int graph_scale; // What inner graph pixel length or width should be when graph length or width is 1
+
 		public bool grid_lines;
 		public int grid_min_spacing;
 
@@ -21,16 +32,23 @@ namespace Strategy
 		public int num_space;
 		public uchar font_size;
 
+		private int width;
+		private int height;
+
 		public Graph (string? func = null)
 		{
 			this.margins = 50;
 
 			this.width_request = 700;
 			this.height_request = 700;
+
 			this.graph_x = 1.0f;
 			this.graph_y = 1.0f;
 			this.graph_sx = -0.5f;
 			this.graph_sy = -0.2f;
+
+			this.scale_mode = GraphScaleMode.FIXED_MIDDLE;
+			this.graph_scale = 600;
 
 			this.grid_lines = true;
 			this.grid_min_spacing = 30;
@@ -52,8 +70,6 @@ namespace Strategy
 		public override bool draw (Cairo.Context cr)
 		{
 			print ("redrawn\n");
-			int width = get_allocated_width () - (2 * margins);
-			int height = get_allocated_height () - (2 * margins);
 
 			//Gtk.StyleContext context = get_style_context ();
 			//context.render_background (cr, 0, 0, width, height);
@@ -71,33 +87,36 @@ namespace Strategy
 
 				print ("fincx: %f fincy: %f", grid_incrament_x, grid_incrament_y);
 				print ("xinc: %d yinc: %d\n", xinc, yinc);
-				for (int x = xinc + margins; x < width + margins; x += xinc)
+				if (!(xinc <= 0 || yinc <= 0))
 				{
-					if (grid_lines)
+					for (int x = xinc + margins; x < width + margins; x += xinc)
 					{
-						cr.move_to (x, margins);
-						cr.line_to (x, height + margins);
+						if (grid_lines)
+						{
+							cr.move_to (x, margins);
+							cr.line_to (x, height + margins);
+						}
+						if (numbers)
+						{
+							cr.move_to (x, height + margins + num_space);
+							cr.show_text (round_to (fx, grid_incrament_x).to_string ());
+							fx += grid_incrament_x;
+						}
 					}
-					if (numbers)
-					{
-						cr.move_to (x, height + margins + num_space);
-						cr.show_text (round_to (fx, grid_incrament_x).to_string ());
-						fx += grid_incrament_x;
-					}
-				}
 
-				for (int y = yinc + margins; y < height + margins; y += yinc)
-				{
-					if (grid_lines)
+					for (int y = yinc + margins; y < height + margins; y += yinc)
 					{
-						cr.move_to (margins, y);
-						cr.line_to (width + margins, y);
-					}
-					if (numbers)
-					{
-						cr.move_to (margins - num_space, y);
-						cr.show_text (round_to (fy, grid_incrament_y).to_string ());
-						fy -= grid_incrament_y;
+						if (grid_lines)
+						{
+							cr.move_to (margins, y);
+							cr.line_to (width + margins, y);
+						}
+						if (numbers)
+						{
+							cr.move_to (margins - num_space, y);
+							cr.show_text (round_to (fy, grid_incrament_y).to_string ());
+							fy -= grid_incrament_y;
+						}
 					}
 				}
 			
@@ -138,6 +157,38 @@ namespace Strategy
 			cr.set_source_rgba (0, 0, 0, 1);
 			cr.stroke ();
 			return true;
+		}
+
+		public override bool configure_event (Gdk.EventConfigure event)
+		{
+			//print ("event\n");
+
+			if (event.type == Gdk.EventType.CONFIGURE)
+			{
+				print ("resized\n");
+
+				this.width = event.width - (2 * margins);
+				this.height = event.height - (2 * margins);
+
+				switch (scale_mode)
+				{
+					case GraphScaleMode.FIXED_LEFT:
+						this.graph_x = (float) width / graph_scale;
+						this.graph_y = (float) height / graph_scale;
+						break;
+					case GraphScaleMode.FIXED_MIDDLE:
+						float temp_x = (float) width / graph_scale - graph_x;
+						float temp_y = (float) height / graph_scale - graph_y;
+						this.graph_x += temp_x;
+						this.graph_y += temp_y;
+						this.graph_sx -= temp_x / 2;
+						this.graph_sy -= temp_y / 2;
+						break;
+				}
+			}
+
+			print ("graph_x: %f graph_y: %f\n", graph_x, graph_y);
+			return false;
 		}
 
 		public void graph (string func)
