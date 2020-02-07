@@ -47,7 +47,7 @@ namespace Strategy
 			this.graph_sx = -0.5f;
 			this.graph_sy = -0.2f;
 
-			this.scale_mode = GraphScaleMode.FIXED_MIDDLE;
+			this.scale_mode = GraphScaleMode.FIXED_RIGHT;
 			this.graph_scale = 600;
 
 			this.grid_lines = true;
@@ -184,6 +184,14 @@ namespace Strategy
 						this.graph_sx -= temp_x / 2;
 						this.graph_sy -= temp_y / 2;
 						break;
+					case GraphScaleMode.FIXED_RIGHT:
+						float temp_x = (float) width / graph_scale - graph_x;
+						float temp_y = (float) height / graph_scale - graph_y;
+						this.graph_x += temp_x;
+						this.graph_y += temp_y;
+						this.graph_sx -= temp_x;
+						this.graph_sy -= temp_y;
+						break;
 				}
 			}
 
@@ -260,3 +268,4 @@ namespace Strategy
 		}
 	}
 }
+
