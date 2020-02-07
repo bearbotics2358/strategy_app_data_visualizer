@@ -13,46 +13,48 @@ namespace Strategy
 		
 	class Graph : Gtk.DrawingArea
 	{
+		// Function to graph
 		public Function function;
 
+		// Margin width around graph in pixels
 		public int margins;
 
-		public float graph_x;
-		public float graph_y;
-		public float graph_sx;
-		public float graph_sy;
-
+		// Type of scaling for x and y
 		public GraphScaleMode scale_mode_x;
 		public GraphScaleMode scale_mode_y;
-		public int graph_scale_x; // What inner graph pixel length or width should be when graph length or width is 1
-		public int graph_scale_y;
+		// What inner graph pixel length or width should be when graph length or width is 1
+		public int scale_x;
+		public int scale_y;
 
+		// To draw grid lines or not
 		public bool grid_lines;
+		// Spacing between grid linues, unused
 		public int grid_min_spacing;
 
+		// To draw grid line numbers or not
 		public bool numbers;
+		// Space between graph boundary and number in pixels
 		public int num_space;
+		// Font size
 		public uchar font_size;
 
 		private int width;
 		private int height;
 
+		private float graph_x;
+		private float graph_y;
+		private float graph_sx;
+		private float graph_sy;
+
 		public Graph (string? func = null)
 		{
 			this.margins = 50;
 
-			this.width_request = 700;
-			this.height_request = 700;
-
-			this.graph_x = 1.0f;
-			this.graph_y = 1.0f;
-			this.graph_sx = -0.5f;
-			this.graph_sy = -0.2f;
-
 			this.scale_mode_x = GraphScaleMode.FIXED_END;
-			this.scale_mode_y = GraphScaleMode.FIXED_START;
-			this.graph_scale_x = 600;
-			this.graph_scale_y = 600;
+			this.scale_mode_y = GraphScaleMode.FIXED_MIDDLE;
+
+			set_sx_x (-0.5f, 1.0f, 700);
+			set_sy_y (-0.5f, 1.0f, 700);
 
 			this.grid_lines = true;
 			this.grid_min_spacing = 30;
@@ -177,34 +179,34 @@ namespace Strategy
 				switch (scale_mode_x)
 				{
 					case GraphScaleMode.FIXED_START:
-						this.graph_x = (float) width / graph_scale_x;
+						this.graph_x = (float) width / scale_x;
 						break;
 					case GraphScaleMode.FIXED_MIDDLE:
-						float temp_x = (float) width / graph_scale_x - graph_x;
-						this.graph_x += temp_x;
-						this.graph_sx -= temp_x / 2;
+						float diff_x = (float) width / scale_x - graph_x;
+						this.graph_x += diff_x;
+						this.graph_sx -= diff_x / 2;
 						break;
 					case GraphScaleMode.FIXED_END:
-						float temp_x = (float) width / graph_scale_x - graph_x;
-						this.graph_x += temp_x;
-						this.graph_sx -= temp_x;
+						float diff_x = (float) width / scale_x - graph_x;
+						this.graph_x += diff_x;
+						this.graph_sx -= diff_x;
 						break;
 				}
 
 				switch (scale_mode_y)
 				{
 					case GraphScaleMode.FIXED_START:
-						this.graph_y = (float) height / graph_scale_y;
+						this.graph_y = (float) height / scale_y;
 						break;
 					case GraphScaleMode.FIXED_MIDDLE:
-						float temp_y = (float) height / graph_scale_y - graph_y;
-						this.graph_y += temp_y;
-						this.graph_sy -= temp_y / 2;
+						float diff_y = (float) height / scale_y - graph_y;
+						this.graph_y += diff_y;
+						this.graph_sy -= diff_y / 2;
 						break;
 					case GraphScaleMode.FIXED_END:
-						float temp_y = (float) height / graph_scale_y - graph_y;
-						this.graph_y += temp_y;
-						this.graph_sy -= temp_y;
+						float diff_y = (float) height / scale_y - graph_y;
+						this.graph_y += diff_y;
+						this.graph_sy -= diff_y;
 						break;
 				}
 
@@ -214,10 +216,29 @@ namespace Strategy
 			return false;
 		}
 
+		// Graph function
 		public void graph (string func)
 		{
 			function = new Function.with_input (func);
 			queue_draw ();
+		}
+
+		// Sets graph starting x position and x range
+		public void set_sx_x (float sx, float x, int n_width)
+		{
+			this.graph_sx = sx;
+			this.graph_x = x;
+			this.scale_x = (int) (n_width / x);
+			this.width_request = n_width + (2 * margins);
+		}
+
+		// Sets graph starting y position and y range
+		public void set_sy_y (float sy, float y, int n_height)
+		{
+			this.graph_sy = sy;
+			this.graph_y = y;
+			this.scale_y = (int) (n_height / y);
+			this.height_request = n_height + (2 * margins);
 		}
 
 		private float get_grid_incrament (float in)
@@ -283,4 +304,5 @@ namespace Strategy
 		}
 	}
 }
+
 
