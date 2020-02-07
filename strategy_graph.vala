@@ -6,9 +6,9 @@ namespace Strategy
 	enum GraphScaleMode
 	{
 		NO_SCALE,
-		FIXED_LEFT,
+		FIXED_START,
 		FIXED_MIDDLE,
-		FIXED_RIGHT
+		FIXED_END
 	}
 		
 	class Graph : Gtk.DrawingArea
@@ -22,8 +22,10 @@ namespace Strategy
 		public float graph_sx;
 		public float graph_sy;
 
-		public GraphScaleMode scale_mode;
-		public int graph_scale; // What inner graph pixel length or width should be when graph length or width is 1
+		public GraphScaleMode scale_mode_x;
+		public GraphScaleMode scale_mode_y;
+		public int graph_scale_x; // What inner graph pixel length or width should be when graph length or width is 1
+		public int graph_scale_y;
 
 		public bool grid_lines;
 		public int grid_min_spacing;
@@ -47,8 +49,10 @@ namespace Strategy
 			this.graph_sx = -0.5f;
 			this.graph_sy = -0.2f;
 
-			this.scale_mode = GraphScaleMode.FIXED_RIGHT;
-			this.graph_scale = 600;
+			this.scale_mode_x = GraphScaleMode.FIXED_END;
+			this.scale_mode_y = GraphScaleMode.FIXED_START;
+			this.graph_scale_x = 600;
+			this.graph_scale_y = 600;
 
 			this.grid_lines = true;
 			this.grid_min_spacing = 30;
@@ -170,29 +174,40 @@ namespace Strategy
 				this.width = event.width - (2 * margins);
 				this.height = event.height - (2 * margins);
 
-				switch (scale_mode)
+				switch (scale_mode_x)
 				{
-					case GraphScaleMode.FIXED_LEFT:
-						this.graph_x = (float) width / graph_scale;
-						this.graph_y = (float) height / graph_scale;
+					case GraphScaleMode.FIXED_START:
+						this.graph_x = (float) width / graph_scale_x;
 						break;
 					case GraphScaleMode.FIXED_MIDDLE:
-						float temp_x = (float) width / graph_scale - graph_x;
-						float temp_y = (float) height / graph_scale - graph_y;
+						float temp_x = (float) width / graph_scale_x - graph_x;
 						this.graph_x += temp_x;
-						this.graph_y += temp_y;
 						this.graph_sx -= temp_x / 2;
+						break;
+					case GraphScaleMode.FIXED_END:
+						float temp_x = (float) width / graph_scale_x - graph_x;
+						this.graph_x += temp_x;
+						this.graph_sx -= temp_x;
+						break;
+				}
+
+				switch (scale_mode_y)
+				{
+					case GraphScaleMode.FIXED_START:
+						this.graph_y = (float) height / graph_scale_y;
+						break;
+					case GraphScaleMode.FIXED_MIDDLE:
+						float temp_y = (float) height / graph_scale_y - graph_y;
+						this.graph_y += temp_y;
 						this.graph_sy -= temp_y / 2;
 						break;
-					case GraphScaleMode.FIXED_RIGHT:
-						float temp_x = (float) width / graph_scale - graph_x;
-						float temp_y = (float) height / graph_scale - graph_y;
-						this.graph_x += temp_x;
+					case GraphScaleMode.FIXED_END:
+						float temp_y = (float) height / graph_scale_y - graph_y;
 						this.graph_y += temp_y;
-						this.graph_sx -= temp_x;
 						this.graph_sy -= temp_y;
 						break;
 				}
+
 			}
 
 			print ("graph_x: %f graph_y: %f\n", graph_x, graph_y);
