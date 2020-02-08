@@ -98,10 +98,9 @@ namespace Strategy
 				int xinc = (int) ((width * grid_incrament_x) / graph_x);
 				int yinc = (int) ((height * grid_incrament_y) / graph_y);
 				float fx = graph_sx;
-				float fy = (grid_incrament_y * ((height / yinc)));
-				print ("fy: %f graph_sy: %f\n", fy, graph_sy);
-				int x = (int) ((((round_to (graph_sx, grid_incrament_x, RoundMode.TO_INFINITY) - graph_sx) * width) / graph_x) + margins);
-				int y = (int) ((((round_to (graph_sy, grid_incrament_y, RoundMode.TO_INFINITY) - graph_sy) * height) / graph_y) + margins);
+				float fy = graph_sy + grid_incrament_y;
+				int x = (int) (((round_to (graph_sx, grid_incrament_x, RoundMode.TO_INFINITY) - graph_sx) * width) / graph_x) + margins;
+				int y = (int) (((graph_sy - round_to (graph_sy, grid_incrament_y, RoundMode.TO_INFINITY)) * height) / graph_y) + margins + height;
 
 				print ("fincx: %f fincy: %f", grid_incrament_x, grid_incrament_y);
 				print ("xinc: %d yinc: %d\n", xinc, yinc);
@@ -122,7 +121,7 @@ namespace Strategy
 						}
 					}
 
-					for (; y < height + margins; y += yinc)
+					for (; y > margins; y -= yinc)
 					{
 						if (grid_lines)
 						{
@@ -133,7 +132,7 @@ namespace Strategy
 						{
 							cr.move_to (margins - num_space, y);
 							cr.show_text (round_to (fy, grid_incrament_y, RoundMode.AWAY_INFINITY).to_string ());
-							fy -= grid_incrament_y;
+							fy += grid_incrament_y;
 						}
 					}
 				}
