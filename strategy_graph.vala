@@ -10,7 +10,16 @@ namespace Strategy
 		FIXED_MIDDLE,
 		FIXED_END
 	}
-		
+
+	enum RoundMode
+	{
+		TO_ZERO,
+		AWAY_ZERO,
+		TO_INFINITY,
+		AWAY_INFINITY,
+		NORMAL
+	}
+
 	class Graph : Gtk.DrawingArea
 	{
 		// Function to graph
@@ -50,7 +59,7 @@ namespace Strategy
 		{
 			this.margins = 50;
 
-			this.scale_mode_x = GraphScaleMode.FIXED_END;
+			this.scale_mode_x = GraphScaleMode.FIXED_MIDDLE;
 			this.scale_mode_y = GraphScaleMode.FIXED_MIDDLE;
 
 			set_sx_x (-0.5f, 1.0f, 700);
@@ -88,14 +97,17 @@ namespace Strategy
 				float grid_incrament_y = get_grid_incrament (graph_y);
 				int xinc = (int) ((width * grid_incrament_x) / graph_x);
 				int yinc = (int) ((height * grid_incrament_y) / graph_y);
-				float fx = graph_sx + grid_incrament_x;
-				float fy = (grid_incrament_y * ((height / yinc) - 1)) + graph_sy;
+				float fx = graph_sx;
+				float fy = (grid_incrament_y * ((height / yinc)));
+				print ("fy: %f graph_sy: %f\n", fy, graph_sy);
+				int x = (int) ((((round_to (graph_sx, grid_incrament_x, RoundMode.TO_INFINITY) - graph_sx) * width) / graph_x) + margins);
+				int y = (int) ((((round_to (graph_sy, grid_incrament_y, RoundMode.TO_INFINITY) - graph_sy) * height) / graph_y) + margins);
 
 				print ("fincx: %f fincy: %f", grid_incrament_x, grid_incrament_y);
 				print ("xinc: %d yinc: %d\n", xinc, yinc);
 				if (!(xinc <= 0 || yinc <= 0))
 				{
-					for (int x = xinc + margins; x < width + margins; x += xinc)
+					for (; x < width + margins; x += xinc)
 					{
 						if (grid_lines)
 						{
@@ -105,12 +117,12 @@ namespace Strategy
 						if (numbers)
 						{
 							cr.move_to (x, height + margins + num_space);
-							cr.show_text (round_to (fx, grid_incrament_x).to_string ());
+							cr.show_text (round_to (fx, grid_incrament_x, RoundMode.TO_INFINITY).to_string ());
 							fx += grid_incrament_x;
 						}
 					}
 
-					for (int y = yinc + margins; y < height + margins; y += yinc)
+					for (; y < height + margins; y += yinc)
 					{
 						if (grid_lines)
 						{
@@ -120,7 +132,7 @@ namespace Strategy
 						if (numbers)
 						{
 							cr.move_to (margins - num_space, y);
-							cr.show_text (round_to (fy, grid_incrament_y).to_string ());
+							cr.show_text (round_to (fy, grid_incrament_y, RoundMode.AWAY_INFINITY).to_string ());
 							fy -= grid_incrament_y;
 						}
 					}
@@ -254,7 +266,7 @@ namespace Strategy
 			return 0.0001f;
 		}
 
-		private float round_to (float in, float round_place)
+		private float round_to (float in, float round_place, RoundMode rounding)
 		{
 			string temp_s = round_place.to_string ();
 			bool flag_1 = false;
@@ -297,9 +309,30 @@ namespace Strategy
 				return float.INFINITY;
 			}
 
+			float rounder = 0.0f;
+
+			switch (rounding)
+			{
+				case RoundMode.TO_INFINITY:
+					rounder = in > 0 ? 1.0f : 0.0f;
+					break;
+				case RoundMode.AWAY_INFINITY:
+					rounder = in > 0 ? 0.0f : -1.0f;
+					break;
+				case RoundMode.TO_ZERO:
+					rounder = in > 0 ? 0.0f : 1.0f;
+					break;
+				case RoundMode.AWAY_ZERO:
+					rounder = in > 0 ? 1.0f : 0.0f;
+					break;
+				case RoundMode.NORMAL:
+					rounder = in > 0 ? 0.5f : -0.5f;
+					break;
+			}
+
 			// Decimal places to round
 			// -3 -2 -1 0 . 1 2 3 4
-			long temp = (long) ((in * Posix.pow (10, decimals)) + (in > 0 ? 0.5 : -0.5));
+			long temp = (long) ((in * Posix.pow (10, decimals)) + rounder);
 			return (float) (temp / Posix.pow (10, decimals));
 		}
 	}
